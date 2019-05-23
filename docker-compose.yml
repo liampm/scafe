@@ -1,0 +1,20 @@
+version: '3.0'
+
+services:
+  app:
+    container_name: ${APP_NAME}-app
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - '.:/usr/src/app'
+      - '/usr/src/app/node_modules'
+    expose:
+      - ${PORT}
+    ports:
+      - ${PORT}:${PORT}
+    entrypoint: ["npm", "start"]
+    environment:
+      PORT: ${PORT}
+      NODE_ENV: development
