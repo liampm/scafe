@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from "react-router-dom";
 
 export default class ProjectList extends React.Component {
     state = {
@@ -28,10 +29,10 @@ export default class ProjectList extends React.Component {
             <article className="card">
                 <div className="collection with-header projectList">
                     <div className="collection-header">
-                        <a href="#!/project/add" className="btn-floating btn-large waves-effect waves-light red right"><i className="material-icons">add</i></a>
+                        <Link to="/projects/add" className="btn-floating btn-large waves-effect waves-light red right"><i className="material-icons">add</i></Link>
                         <h4>Projects</h4>
                     </div>
-                    {this.state.projects.map((project) => <a className="collection-item" key={project.id} href={`#!/project/${project.id}`}>{project.name}</a>)}
+                    {this.state.projects.map((project) => <Link className="collection-item" key={project.id} to={`/project/${project.id}`}>{project.name}</Link>)}
                 </div>
             </article>
         );

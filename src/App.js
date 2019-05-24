@@ -5,12 +5,12 @@ import ProjectList from './Project/ProjectList';
 import ProjectAdd from './Project/ProjectAdd';
 import {
     Route,
-    HashRouter
+    BrowserRouter as Router
 } from "react-router-dom";
 
 export default function App() {
     return (
-        <HashRouter>
+        <Router>
             <article className="App">
                 <Nav />
                 <article className="pageContent">
@@ -20,6 +20,6 @@ export default function App() {
                     <Route path="/project/:id" component={Project}/>
                 </article>
             </article>
-        </HashRouter>
+        </Router>
     );
 }
