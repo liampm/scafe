@@ -3,8 +3,11 @@ import React from 'react';
 export default class ProjectAdd extends React.Component {
     state = {
         name: undefined,
-        targets: [],
-        jobs: []
+        projectId: undefined,
+        targets: [
+            {name:'test', config:{type:'git-repo', details:{username:'dom111', url:'git@github.com:dom111/dotfiles.git', token:'token' } }}
+        ],
+        tasks: []
     };
 
     render() {
@@ -17,7 +20,7 @@ export default class ProjectAdd extends React.Component {
                 </div>
 
                 <div className="input-field">
-                    <input id="project__name" type="text" required minLength={3 } className="validate"/>
+                    <input id="project__name" type="text"  minLength={3 } className="validate"/>
                     <label htmlFor="project__name">Project Name</label>
                 </div>
 
@@ -26,9 +29,14 @@ export default class ProjectAdd extends React.Component {
                         <h5>Targets</h5>
                     </li>
                     {this.state.targets.map((target, i) => (
-                        <li className="collection-item" key={`project__target--${i}`}>
-                            <div data-target={target}>
-                                {target}
+                        <li className="card collection-item" key={`project__target_name--${i}`}>
+                            <div data-target={JSON.stringify(target)}>
+                                {target.name} &nbsp;
+                                <em style={{color: '#aaa'}}>
+                                    {target.config.type} -
+                                    {target.config.details.url}
+                                </em>
+
                                 <a href="#!/project/target/delete" className="secondary-content" onClick={(e) => {
                                     e.preventDefault();
                                     this.removeTarget(e.currentTarget.parentNode);
@@ -40,40 +48,81 @@ export default class ProjectAdd extends React.Component {
                     ))}
                 </ul>
 
-                <div className="input-field">
-                    <input
-                        id="project__target"
-                        type="text"
-                        className="validate"
-                        required
-                        minLength={3}
-                        onKeyPress={(e) => {
-                           if (e.which === 13) {
-                               e.preventDefault();
+                <div className="card" id="target_input" style={{color: '#aaa', padding: '10px'}}>
+                    <div>
+                        <select className="browser-default" id="project__target__config__type" defaultValue="git-repo">
+                            <option  value="">Target Type</option>
+                            <option  value="git-repo">Git Repo</option>
+                        </select>
+                    </div>
+                    <div className="input-field">
+                        <input
+                            id="project__target__name"
+                            name="targetName"
+                            type="text"
+                            className="validate"
+                            
+                            minLength={3}
 
-                               this.saveTarget(e.target);
-                           }
-                        }}
-                        onBlur={(e) => {
-                            e.currentTarget.removeAttribute('required');
-                            this.saveTarget(e.currentTarget);
-                        }}
-                        onFocus={(e) => e.currentTarget.setAttribute('required', '')}
-                    />
-                    <label htmlFor="project__target">Target</label>
+                        />
+                        <label htmlFor="project__target__name">Target Name</label>
+                    </div>
+                    <div className="input-field">
+                        <input
+                            id="project__target__config__username"
+                            name="targetUsername"
+                            type="text"
+                            className="validate"
+                            
+                        />
+                        <label htmlFor="project__target__config__username">Target Username</label>
+                    </div>
+                    <div className="input-field">
+                        <input
+                            id="project__target__config__url"
+                            name="targetUrl"
+                            type="text"
+                            className="validate"
+                            
+                        />
+                        <label htmlFor="project__target__config__url">Target URL</label>
+                    </div>
+                    <div className="input-field">
+                        <input
+                            id="project__target__config__token"
+                            name="targetToken"
+                            type="text"
+                            className="validate"
+                            
+
+                            // onBlur={(e) => {
+                            //     e.currentTarget.removeAttribute('');
+                            //     this.saveTarget();
+                            // }}
+                            // onFocus={(e) => e.currentTarget.setAttribute('', '')}
+                        />
+                        <label htmlFor="project__target__config__token">Target Token</label>
+                    </div>
+                    <button className="btn waves-effect waves-light"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                this.saveTarget();
+                            }}>
+                        Add Task
+                    </button>
                 </div>
 
                 <ul className="collection with-header" id="project__jobs">
                     <li className="collection-header">
-                        <h5>Jobs</h5>
+                        <h5>Tasks</h5>
                     </li>
-                    {this.state.jobs.map((job, i) => (
+                    {this.state.tasks.map((task, i) => (
                         <li className="collection-item" key={`project__job--${i}`}>
-                            <div data-job={job}>
-                                {job}
-                                <a href="#!/project/job/delete" className="secondary-content" onClick={(e) => {
+                            <div data-task={task}>
+                                {task}
+                                <a href="#!/project/task/delete" className="secondary-content" onClick={(e) => {
                                     e.preventDefault();
-                                    this.removeJob(e.currentTarget.parentNode);
+                                    this.removeTask(e.currentTarget.parentNode);
                                 }}>
                                     <i className="material-icons">delete</i>
                                 </a>
@@ -87,18 +136,18 @@ export default class ProjectAdd extends React.Component {
                         id="project__job"
                         type="text"
                         className="validate"
-                        required
+                        
                         minLength={3}
                         onKeyPress={(e) => {
                            if (e.which === 13) {
                                e.preventDefault();
 
-                               this.saveJob(e.currentTarget);
+                               this.saveTask(e.currentTarget);
                            }
                         }}
                         onBlur={(e) => {
                             e.currentTarget.removeAttribute('required');
-                            this.saveJob(e.currentTarget);
+                            this.saveTask(e.currentTarget);
                         }}
                         onFocus={(e) => e.currentTarget.setAttribute('required', '')}
                     />
@@ -114,23 +163,60 @@ export default class ProjectAdd extends React.Component {
         );
     }
 
-    saveTarget(input) {
-        let target = input.value;
+    saveTarget() {
+        // {name:'test', config:{type:'', details:{username:'', url:'', token:'' } }}
+        let inputs = {
+            name: document.getElementById("project__target__name"),
+            type: document.getElementById("project__target__config__type"),
+            username: document.getElementById("project__target__config__username"),
+            url: document.getElementById("project__target__config__url"),
+            token: document.getElementById("project__target__config__token")
+        };
 
-        input.setCustomValidity('');
+        let selectedType = inputs.type.options[inputs.type.selectedIndex].value;
 
-        if (input.willValidate && ! input.checkValidity()) {
+
+        let target = {
+            name: inputs.name.value,
+            config: {
+                type: selectedType,
+                details: {
+                    username: inputs.username.value,
+                    url: inputs.url.value,
+                    token: inputs.token.value
+                }
+            }
+        };
+        console.log(target);
+        inputs.name.setCustomValidity('');
+
+        if (inputs.name.willValidate && ! inputs.name.checkValidity()) {
+            return;
+        }
+        if (inputs.type.willValidate && !inputs.type.checkValidity()) {
+            return;
+        }
+        if (inputs.username.willValidate && !inputs.username.checkValidity()) {
+            return;
+        }
+        if (inputs.url.willValidate && !inputs.url.checkValidity()) {
+            return;
+        }
+        if (inputs.token.willValidate && !inputs.token.checkValidity()) {
             return;
         }
 
         this.setState((state) => {
-            if (state.targets.includes(target)) {
-                input.setCustomValidity('The target already exists.');
-
+            if (state.targets.includes(target.name)) {
+                inputs.name.setCustomValidity('The target already exists.');
                 return state;
             }
 
-            input.value = '';
+            inputs.name.value = '';
+            inputs.type.value = '';
+            inputs.username.value = '';
+            inputs.url.value = '';
+            inputs.token.value = '';
 
             return {
                 targets: state.targets.concat([target])
@@ -140,13 +226,12 @@ export default class ProjectAdd extends React.Component {
 
     removeTarget(targetElement) {
         this.setState((state) => ({
-            targets: state.targets.filter((target) => target !== targetElement.getAttribute('data-target'))
+            targets: state.targets.filter((target) => JSON.stringify(target) !== targetElement.getAttribute('data-target'))
         }))
     }
 
-    saveJob(input) {
-        let jon = input.value;
-
+    saveTask(input) {
+        let task = input.value;
         input.setCustomValidity('');
 
         if (input.willValidate && ! input.checkValidity()) {
@@ -154,8 +239,8 @@ export default class ProjectAdd extends React.Component {
         }
 
         this.setState((state) => {
-            if (state.jobs.includes(jon)) {
-                input.setCustomValidity('The job already exists.');
+            if (state.tasks.includes(task)) {
+                input.setCustomValidity('The task already exists.');
 
                 return state;
             }
@@ -163,14 +248,14 @@ export default class ProjectAdd extends React.Component {
             input.value = '';
 
             return {
-                jobs: state.jobs.concat([jon])
+                tasks: state.tasks.concat([task])
             };
         });
     }
 
-    removeJob(targetElement) {
+    removeTask(targetElement) {
         this.setState((state) => ({
-            jobs: state.jobs.filter((jon) => jon !== targetElement.getAttribute('data-job'))
+            tasks: state.tasks.filter((task) => task !== targetElement.getAttribute('data-task'))
         }))
     }
 
@@ -183,15 +268,52 @@ export default class ProjectAdd extends React.Component {
         let targetElements = document.querySelectorAll('#project__targets li > div');
         let targets = Array.from(targetElements || []).map((targetElement) => targetElement.getAttribute('data-target'));
         let jobElements = document.getElementById('project__jobs');
-        let jobs = Array.from(jobElements || []).map((jobElement) => jobElement.getAttribute('data-job'));
+        let tasks = Array.from(jobElements || []).map((jobElement) => jobElement.getAttribute('data-task'));
 
         let project = {
             name,
             targets,
-            jobs
+            tasks
         };
 
         // call API
         console.log(project);
+
+        fetch('http://localhost:7890/project', {
+            method: 'POST',
+            // mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: this.state.name
+            }),
+
+        })
+            .then((response) => response.json())
+
+            .then((project) => {
+                this.state.targets.forEach((target) => {
+
+                    fetch( `http://localhost:7890/project/${project.id}/target`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(target),
+                    } )
+                })
+                    .then(() => {
+                        this.state.tasks.forEach((task) => {
+                            fetch(`http://localhost:7890/project/${project.id}/task`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(task),
+                            })
+                        })
+                    })
+        });
     }
 }
