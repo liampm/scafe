@@ -3,25 +3,7 @@ import { Link } from "react-router-dom";
 
 export default class ProjectList extends React.Component {
     state = {
-        // TODO: remove
-        projects: [
-            // {
-            //     id: '1',
-            //     name: 'Test Project 1'
-            // },
-            // {
-            //     id: '2',
-            //     name: 'Test Project 2'
-            // },
-            // {
-            //     id: '3',
-            //     name: 'Test Project 3'
-            // },
-            // {
-            //     id: '4',
-            //     name: 'Test Project 4'
-            // }
-        ]
+        projects: []
     };
 
     render() {
@@ -32,7 +14,15 @@ export default class ProjectList extends React.Component {
                         <Link to="/projects/add" className="btn-floating btn-large waves-effect waves-light red right"><i className="material-icons">add</i></Link>
                         <h4>Projects</h4>
                     </div>
-                    {this.state.projects.map((project) => <Link className="collection-item" key={project.id} to={`/project/${project.id}`}>{project.name}</Link>)}
+                    {
+                        (this.state.projects.length) ?
+                            this.state.projects.map((project) => (
+                                <Link className="collection-item" key={project.id} to={`/project/${project.id}`}>{project.name}</Link>
+                            )) :
+                            <div className="collection-item">
+                                There are currently no projects
+                            </div>
+                    }
                 </div>
             </article>
         );
@@ -41,7 +31,6 @@ export default class ProjectList extends React.Component {
     componentWillMount() {
         fetch('http://localhost:7890/project', {
             method: 'GET',
-            // mode: 'cors',
             headers: {
                 'Content-Type': 'application/json'
             }
