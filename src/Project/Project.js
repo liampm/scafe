@@ -121,7 +121,17 @@ export default class Project extends React.Component {
             .then(() => {
                 // would be nice to show progress here, remove the button (since analysis is queued) and then update
                 // (perhaps we need to poll?) with a link to the analysis when complete
-                console.log('finished');
+                fetch(`http://localhost:7890/project/${this.state.id}/job`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then((response) => response.json())
+                    .then((jobs) => this.setState(() => ({
+                        jobs: jobs
+                    })))
+                ;
             })
         ;
     }
